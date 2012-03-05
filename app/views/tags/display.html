@@ -1,0 +1,182 @@
+*{ Display a post in one of these modes: 'full', 'compact' }*
+
+#{set 'moreMeta'}
+	<meta property="og:title" content="${_post.title}"/>
+	<meta property="og:type" content="article" />
+	<meta property="og:image" content="" />
+	<meta property="og:url" content="${'http://localhost:9000/post/' + _post.id}"/>
+	<meta property="og:site_name" content="scroll2lol"/>
+	<meta property="og:description" content="Funny image on scroll2lol" />
+	<meta property="og:title" content="" />
+	<meta property="fb:admins" content="556654946" />
+#{/set}
+
+#{set 'fbScript'}
+	<script>(function(d, s, id) {
+		var js, fjs = d.getElementsByTagName(s)[0];
+		if (d.getElementById(id)) return;
+		js = d.createElement(s); js.id = id;
+		js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=379801295380639";
+		fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+	</script>
+#{/set}
+
+#{if _as == 'full'}
+	<div class="post">
+		<div class="post-header">
+			<div id="menu">
+				#{if _user}
+					#{if _post.author == _user}
+						<a class="buttons deletepost" href="@{Application.deletePost(_post.id)}">Delete</a>
+					#{/if}
+					<a class="${_post.id} buttons like ${!_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Like</a>
+					<a class="${_post.id} buttons unlike ${_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Unlike</a>
+				#{/if}
+				&nbsp;&nbsp;&nbsp;
+				#{if _post.next()}
+		  		  	<a class="nav" href="@{Application.show(_post.next().id)}">&lt;</a>
+		   		 #{/if}
+		   		 #{if _post.previous()}
+		   		 	<a class="nav" href="@{Application.show(_post.previous().id)}">&gt;</a>
+		  	 	 #{/if}
+			</div>
+		    <h2 class="post-title">
+		        <a href="@{Application.show(_post.id)}">${_post.title}</a>
+		    </h2>
+		    <div class="post-metadata">
+		        <span class="post-author">by <a href="@{Application.profile(_post.author.username)}">${_post.author.username}</a></span>
+		        &nbsp;|&nbsp;
+		        <span class="post-date">${_post.postedAt.since()}</span>
+		        &nbsp;|&nbsp;
+				<span id="${_post.id}">Likes: ${_post.likes}</span>
+				&nbsp;|&nbsp;
+				<span class="post-comments">Comments: ${_post.comments.size()}</span>
+				&nbsp;|&nbsp;
+				#{if _post.source}
+				<span><a href="${_post.source}">Source</a></span>
+				#{/if}
+				#{else}
+				<span>Unknown source</span>
+				#{/else}
+				#{if _post.tags}
+					<br />
+					<span class="post-tags">
+			    		Tagged:
+			    		#{list items:_post.tags, as:'tag'}
+			        		<a href="@{Application.listTagged(tag.id, tag.name.slugify())}">${tag.name}</a>${tag_isLast ? '' : ', '}
+			    		#{/list}
+					</span>
+				#{/if}
+			</div>
+			<div class="social-buttons">
+				<div class="fb-like" data-send="false" data-layout="button_count" data-href="http://localhost:9000/post/${_post.id}" data-width="90" data-show-faces="false"></div>
+				<div class="g-plusone" data-size="medium" data-href="http://localhost:9000/post/${_post.id}"></div>
+				<script type="text/javascript">
+					(function() {
+						var po = document.createElement('script'); 
+						po.type = 'text/javascript'; 
+						po.async = true;
+						po.src = 'https://apis.google.com/js/plusone.js';
+						var s = document.getElementsByTagName('script')[0]; 
+						s.parentNode.insertBefore(po, s);
+					})();
+				</script>
+				<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://localhost:9000/post/${_post.id}" data-hashtags="scroll2lol">Tweet</a>
+				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+			</div>
+		</div>
+		#{if flash.success}
+		    <p class="success">${flash.success} <span class="close">x</span></p>
+		#{/if}
+		<a href="@{Application.showPic(_post.id)}"><img class="post-content" src="@{Application.showPic(_post.id)}" alt="${_post.id}" /></a>
+	</div>
+#{/if}
+#{elseif _as == 'compact'}
+	<div class="post">
+		<div class="front">	
+			<a href="@{Application.show(_post.id)}"><img class="post-content" src="@{Application.showPic(_post.id)}" alt="${_post.id}" /></a>
+		</div>
+		<div class="post-data">
+	    	<h2 class="post-title">
+	        	<a href="@{Application.show(_post.id)}">${_post.title}</a>
+	        </h2>
+	    	<div class="post-metadata">
+	        	<span class="post-author">by <a href="@{Application.profile(_post.author.username)}">${_post.author.username}</a></span>
+	        	<br />
+	        	<span class="post-date">${_post.postedAt.since()}</span>
+	        	<br />
+	        	<span id="${_post.id}">Likes: ${_post.likes}</span>
+	        	<br />
+	            <span class="post-comments">
+	                ${_post.comments.size() ?: 'no'} comment${_post.comments.size().pluralize()}
+	                #{if _post.comments}
+	                	- latest by ${_post.comments[_post.comments.size()-1].author}
+	                #{/if}
+	            </span>
+	            <br />
+			    #{if _post.source}
+					<span><a href="${_post.source}">Source</a></span>
+				#{/if}
+				#{else}
+					<span>Unknown source</span>
+				#{/else}
+	            <br /><br /><br />
+				#{if _user}
+					<span class="actions">
+						<a class="buttons comment" href="@{Application.show(_post.id)}#comments">Comment</a>
+						
+						<a class="${_post.id} buttons like ${!_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Like</a>
+						<a class="${_post.id} buttons unlike ${_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Unlike</a>
+					</span>
+					<br /><br />
+				#{/if}
+				#{else}
+					<span><a href="@{Secure.login()}">Login</a> or <a href="@{Application.regform()}">register</a> to like or comment</span>
+				#{/else}
+				<div class="social-buttons">
+					<div class="fb-like" data-send="false" data-layout="button_count" data-href="http://localhost:9000/post/${_post.id}" data-width="90" data-show-faces="false"></div>
+					<br />
+					<div class="g-plusone" data-size="medium" data-href="http://localhost:9000/post/${_post.id}"></div>
+					<script type="text/javascript">
+						(function() {
+							var po = document.createElement('script'); 
+							po.type = 'text/javascript'; 
+							po.async = true;
+							po.src = 'https://apis.google.com/js/plusone.js';
+							var s = document.getElementsByTagName('script')[0]; 
+							s.parentNode.insertBefore(po, s);
+						})();
+					</script>
+					<br />
+					<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://localhost:9000/post/${_post.id}" data-hashtags="scroll2lol">Tweet</a>
+					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+				</div>
+	    	</div>
+	    </div>
+	</div>
+	<hr class="break" />
+#{/elseif}
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	//Like
+	$('.${_post.id}.buttons.like').click(function(){
+		$.post('@{like}', {id: ${_post.id}}, function(postLikes){
+			$('#${_post.id}').html('Likes: ' + postLikes)
+			$('.${_post.id}.buttons.like').hide();
+			$('.${_post.id}.buttons.unlike').show();
+		}, 'json');
+	});
+
+	//Unlike
+	$('.${_post.id}.buttons.unlike').click(function(){
+		$.post('@{unlike}', {id: ${_post.id}}, function(postLikes){
+			$('#${_post.id}').html('Likes: ' + postLikes)
+			$('.${_post.id}.buttons.unlike').hide();
+			$('.${_post.id}.buttons.like').show();
+		}, 'json');
+	});
+});
+</script>

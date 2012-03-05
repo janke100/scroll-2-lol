@@ -1,0 +1,40 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol: Top ' + category /}
+
+#{if posts.size()}
+	#{list items:posts, as:'post'}
+		#{display post:post, as:'compact', user:user /}
+	#{/list}
+#{/if}
+
+#{else}
+    <div class="empty">
+        There is currently nothing here.
+    </div>
+#{/else}
+
+<ul id="pagination">
+#{if nextPage!=1}
+	#{if previousPage==0}
+		<li id="previous">
+			<a href="@{Application.top(category.slugify())}">previous</a>
+		</li>
+	#{/if}
+	#{else}
+		<li id="previous">
+			<a href="@{Application.top(category.slugify(), previousPage)}">previous</a>
+		</li>
+	#{/else}
+#{/if}
+#{if nextButton}
+	<li id="next">
+		<a href="@{Application.top(category.slugify(), nextPage)}">next</a>
+	</li>
+#{/if}
+</ul>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('.top').addClass("current");
+	});
+</script>

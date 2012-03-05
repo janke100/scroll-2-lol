@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol: Most popular tags' /}
+
+#{set "moreScripts"}
+	<script type="text/javascript" src="@{'/public/javascripts/tags.js'}" charset="utf-8"></script>
+#{/set}
+
+<div class="tag-cloud">
+	#{list items:cloud, as:'tag'}
+		<a class="tag-link" name="${tag.pound}" href="@{Application.listTagged(tag.id, tag.tagName.slugify())}">${tag.tagName}</a>
+	#{/list}
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('.tags').addClass("current");
+	});
+</script>

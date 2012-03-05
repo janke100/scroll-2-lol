@@ -1,0 +1,56 @@
+#{extends 'main.html' /}
+#{set title: 'scroll2lol: ' + post.title /}
+
+#{display post:post, as:'full', user:user /}
+
+<div id="comments" class="comments">
+	<h3>
+        ${post.comments.size() ?: 'no'} 
+    	comment${post.comments.size().pluralize()}
+    </h3>        
+    #{list items:post.comments, as:'comment'}
+    	<div class="comment">
+            <div class="comment-metadata">
+                <span class="comment-author">by <a href="@{Application.profile(comment.author)}">${comment.author}</a>,</span>
+                <span class="comment-date">
+                    ${comment.postedAt.format('dd MMM yy')}
+                </span>
+            </div>
+            <div class="comment-content">
+                <div class="about">Detail: </div>
+                ${comment.content.escape().nl2br()}
+            </div>
+       </div>
+    #{/list}    
+</div>
+
+#{if user}
+<h3>Post a comment</h3>
+#{form @Application.postComment(post.id)}
+
+	#{ifErrors}
+        <span class="error">${errors[0]}</span>
+    #{/ifErrors}
+
+    <p>
+        <label for="content">Your message: </label>
+        <textarea name="content" id="content">${params.content}</textarea>
+    </p>
+    <p>
+        <input type="submit" value="Submit your comment" />
+    </p>
+#{/form}
+#{/if}
+
+<script type="text/javascript">
+	$('.post-content').load(function() {         
+
+  	 	// If there is an error, scroll down to comments
+  	  	if($('form .error').size()) {
+      	  		$('html,body').animate({
+					scrollTop: $('form .error').offset().top
+					},2000);
+      		   	$('form textarea').get(0).focus();
+      	}
+   	});
+</script>

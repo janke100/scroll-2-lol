@@ -1,0 +1,53 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol: Sign up' /}
+
+#{form @addUser(), class:'signup'}
+
+	<fieldset>
+		<legend>Registration information</legend>
+		
+*{		#{ifErrors}
+	        <p class="error">
+	            ${errors[0]}
+	        </p>
+    	#{/ifErrors}
+}*		
+		<p>
+			<label>Enter your email: <span class="asterisk-required">*</span></label>
+	        <input type="text" name="email" size="30" autofocus="autofocus" />
+	        <span class="${errors.forKey('newUser.email') ? 'error' : ''}">#{error 'newUser.email' /}</span>
+	    </p>    
+	    <br />
+	    <p>
+			<label>Enter your password: <span class="asterisk-required">*</span></label>
+	        <input type="password" size="30" name="password" />
+	        <span class="${errors.forKey('newUser.password') ? 'error' : ''}">#{error 'newUser.password' /}</span>
+	    </p>  
+	    <p>
+			<label>Confirm your password: <span class="asterisk-required">*</span></label>
+	        <input type="password" size="30" name="retypepass" />
+	        <span class="${errors.forKey('newUser.password') ? 'error' : ''}">#{error 'newUser.password' /}</span>
+	        <span class="${errors.forKey('mismatch') ? 'error' : ''}">#{error 'mismatch' /}</span>
+	    </p>  
+	    <br />
+	    <p>
+			<label>Enter your username: <span class="asterisk-required">*</span></label>
+	        <input type="text" name="username" size="30" value="${newUser?.username}" />
+	        <span class="${errors.forKey('newUser.username') ? 'error' : ''}">#{error 'newUser.username' /}</span>
+	    </p>
+	    <br />
+	    <p>
+	    <img src="@{Application.captcha(randomID)}" alt="captcha" />
+	    <label for="code">Please type the code above: <span class="asterisk-required">*</span></label>
+	    <input type="text" name="code" id="code" />
+	    <span class="${errors.forKey('captcha') ? 'error' : ''}">#{error 'captcha' /}</span>
+	    <input type="hidden" name="randomID" value="${randomID}" />
+		</p>
+		<br />
+		<p class="asterisk-required">* = Required</p>
+		<br />
+	    <p>
+	        <input type="submit" value="Submit" />
+	    </p>
+	</fieldset>
+#{/form}  

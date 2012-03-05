@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol' /}
+
+#{if flash.success}
+    <p class="success">${flash.success} <span class="close">x</span></p>
+#{/if}
+
+#{if posts.size()}
+
+	#{list items:posts, as:'post'}
+		#{display post:post, as:'compact', user:user /}
+	#{/list}
+
+#{/if}
+ 
+#{else}
+    <div class="empty">
+        There is currently nothing here.
+    </div>
+#{/else}
+
+<ul id="pagination">
+#{if nextPage!=1}
+	#{if previousPage == 0}
+		<li id="previous">
+			<a href="@{Application.index()}">previous</a>
+		</li>
+	#{/if}
+	#{else}
+		<li id="previous">
+			<a href="@{Application.page(previousPage)}">previous</a>
+		</li>
+	#{/else}
+#{/if}
+#{if nextButton}
+	<li id="next">
+		<a href="@{Application.page(nextPage)}">next</a>
+	</li>
+#{/if}
+</ul>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('.new').addClass("current");
+	});
+</script>

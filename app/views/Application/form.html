@@ -1,0 +1,78 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol: Upload' /}
+
+#{form @save(), enctype:'multipart/form-data', class:'upload'}
+*{ 
+    #{ifErrors}
+        <p class="error">
+            ${errors[0]}
+        </p>
+    #{/ifErrors}
+}*
+    <fieldset>
+		<legend>Create a new post</legend> 
+		<span class="${errors.forKey('exception') ? 'error' : ''}">#{error 'exception' /}</span>
+
+	#{if isFile}
+	    <p>
+	        #{field 'imageFile'}
+	        <label>Image file: <span class="asterisk-required">*</span></label>
+	        <input type="file" class="input-file" tabindex="1" name="${field.name}" autofocus="autofocus" />
+	        <span class="${errors.forKey('post.image') ? 'error' : ''}">#{error 'post.image' /}</span>
+	        <span class="${errors.forKey('type') ? 'error' : ''}">#{error 'type' /}</span>
+	        <span class="${errors.forKey('size') ? 'error' : ''}">#{error 'size' /}</span>
+	        <br /> <a class="file-url" href="@{Application.form(false)}">Use a URL instead</a> &nbsp; <span class="image-requirements">JPEG, PNG or GIF. Max size: 2MB.</span>
+	        #{/field}
+	        <input type="hidden" name="url">
+	        <input type="hidden" name="isFile" value="true">
+	    </p>
+	    <br />
+	#{/if}
+	#{else} 
+	    <p>
+	    	<input type="hidden" name="imageFile">
+	        #{field 'url'}
+	        <label>Image URL: <span class="asterisk-required">*</span></label>
+	        <input type="text" size="70" tabindex="1" name="${field.name}" autofocus="autofocus" />
+	        *{<span class="${errors.forKey('image') ? 'error' : ''}">#{error 'image' /}</span>}*
+	        <span class="${errors.forKey('invalid-url') ? 'error' : ''}">#{error 'invalid-url' /}</span>
+	     	<span class="${errors.forKey('type') ? 'error' : ''}">#{error 'type' /}</span>
+	        <span class="${errors.forKey('size') ? 'error' : ''}">#{error 'size' /}</span>
+	        <br /> <a class="file-url" href="@{Application.form(true)}">Upload a file instead</a> &nbsp; <span class="image-requirements">JPEG, PNG or GIF. Max size: 2MB.</span>
+	        <input type="hidden" name="isFile" value="false">
+	        #{/field}
+	    </p>
+	    <br />
+	#{/else}
+	    <p>
+	        #{field 'title'}
+	        <label>Post title: <span class="asterisk-required">*</span></label>
+	        <input type="text" size="50" tabindex="2" name="${field.name}" value="${post?.title}" />
+	        <span class="${errors.forKey('post.title') ? 'error' : ''}">#{error 'post.title' /}</span>
+	        #{/field}
+	    </p>
+	    <br />	
+	 	<p>
+	        #{field 'tags'}
+	        <label>Enter some tags:</label>
+	        <input type="text" size="70" tabindex="3" name="${field.name}" value="${post?.tags?.join(', ')}" placeholder="tag1, tag2, tag3" />
+	        <br /> <span class="image-requirements">Use comma to separate each tag (tag1, tag2, tag3)</span>
+	        #{/field}
+	    </p>
+	 	<br />
+	 	
+	 	<p>
+	        #{field 'source'}
+	        <label>Source URL:</label>
+	        <input type="text" size="70" tabindex="4" name="${field.name}" value="${post?.source}" />
+	        <span class="${errors.forKey('post.source') ? 'error' : ''}">#{error 'post.source' /}</span>
+	        #{/field}
+    	</p>
+    	<br />
+		<p class="asterisk-required">* = Required</p>
+		<br />
+	    <p>
+	        <input type="submit" tabindex="5" value="Publish this post" />
+	    </p>
+    </fieldset>
+#{/form}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>scroll2lol: Administration</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        #{get 'moreStyles' /}	
+        <link rel="stylesheet" type="text/css" media="screen" 
+                href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+                href="@{'/public/images/favicon.png'}" />
+        <script src="@{'/public/javascripts/jquery-1.6.4.min.js'}"></script>
+        <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
+    </head>
+    <body id="admin">
+        
+        <div id="header">
+            <div id="logo">
+                <a href="@{Application.index()}">scroll 2 lol</a>&nbsp;&nbsp;<span>administration</span>
+            </div>
+            <ul id="tools">
+                <li>
+                	<a href="@{Application.profile(user.username)}">${user.username} ▾</a>
+                </li>
+				<li>
+					<ul class="hdn">
+						<li><a href="@{Application.form()}">Upload</a></li>
+						<li><a href="@{Application.settings()}">Settings</a></li>
+						#{secure.check "admin"}
+							<li><a href="@{Admin.index()}">Admin</a></li>
+						#{/secure.check}
+						<li><a href="@{Secure.logout()}">Log out</a></li>
+					</ul>
+                </li>
+            </ul>
+        </div>
+        
+<div id="main">
+    
+    <ul id="adminMenu">
+    	<li class="">
+            <a href="@{Application.index()}">Home</a>
+        </li>
+        <li class="${request.controller == 'Admin' ? 'selected' : ''}">
+            <a href="@{Admin.index()}">Admin</a>
+        </li>
+        <li class="${request.controller == 'Posts' ? 'selected' : ''}">
+            <a href="@{Posts.list()}">Posts</a>
+        </li>
+        <li class="${request.controller == 'Tags' ? 'selected' : ''}">
+            <a href="@{Tags.list()}">Tags</a>
+        </li>
+        <li class="${request.controller == 'Comments' ? 'selected' : ''}">
+            <a href="@{Comments.list()}">Comments</a>
+        </li>
+        <li class="${request.controller == 'Users' ? 'selected' : ''}">
+            <a href="@{Users.list()}">Users</a>
+        </li>
+    </ul>
+    
+    #{doLayout /} 
+</div>
+        
+        <p id="footer">
+            made by <b>shkomyVSjanke100</b>
+        </p>
+        
+    </body>
+</html>

@@ -1,0 +1,38 @@
+#{extends 'Secure/layout.html' /}
+
+<div id="login">
+	
+	<h1>&{'secure.title'}</h1>
+		
+	#{form @authenticate(), class:'login'}
+		
+		#{if flash.error}
+			<p class="error">
+				&{flash.error}
+			</p>
+		#{/if}
+		#{if flash.success}
+			<p class="success">
+				&{flash.success}
+			</p>
+		#{/if}
+		<fieldset>
+			<legend>Log in</legend>
+			<p id="username-field">
+				<label for="username">&{'secure.username'}</label>
+				<input type="text" size="30" name="username" id="username" autofocus="autofocus" value="${flash.username}" />
+			</p>
+			<p id="password-field">
+				<label for="password">&{'secure.password'}</label>
+				<input type="password" size="30" name="password" id="password" value="" />
+			</p>
+			<p id="remember-field">
+				<label for="remember">&{'secure.remember'}</label>
+				<input type="checkbox" id="remember" name="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
+			</p>
+			<p id="signin-field">
+				<input type="submit" id="signin" value="&{'secure.signin'}" />
+			</p>
+		</fieldset>
+	#{/form}
+</div>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}" />
+        <script src="@{'/public/javascripts/jquery-1.6.4.min.js'}" type="text/javascript" charset="${_response_encoding}"></script> 
+		#{get 'moreScripts' /}
+		#{get 'moreMeta' /}
+    </head>
+    <body>
+		<div id="fb-root"></div>
+		#{get 'fbScript' /}
+        
+        <div id="header">
+            <div id="logo">
+                &nbsp; <a href="@{Application.index()}">scroll 2 lol</a>
+            </div>
+		#{if user}
+            <ul id="tools">
+                <li>
+                	<a href="@{Application.profile(user.username)}">${user.username} ▾</a>
+                </li>
+				<li>
+					<ul class="hdn">
+						<li><a href="@{Application.form()}">Upload</a></li>
+						<li><a href="@{Application.settings()}">Settings</a></li>
+						#{secure.check "admin"}
+							<li><a href="@{Admin.index()}">Admin</a></li>
+						#{/secure.check}
+						<li><a href="@{Secure.logout()}">Log out</a></li>
+					</ul>
+                </li>
+            </ul>
+		#{/if}
+            
+		#{else}
+            <ul id="tools">
+            	<li>
+                    <a href="@{Secure.login()}">Log in</a>
+                </li>
+                <li>
+                	<a href="@{Application.regform()}">Sign up</a>
+				</li>
+				<li>
+					<ul class="hdn">
+						<li><a href="@{Application.form()}">Upload</a></li>
+					</ul>
+                </li>
+            </ul>    
+		#{/else}
+            <div id="title">
+                <span class="about">About this site</span>
+                <h1><a href="@{Application.index()}">Discover and share lolz</a></h1>
+                <h2>Where funny meets hilarious</h2>
+				<div id="search">
+					#{form @results(), class:'search'}
+						<p>
+							<input type="text" name="query" size="40" placeholder="Search for teh lulz" />
+							<input type="submit" value="Search" />
+						</p>
+					#{/form}
+				</div>
+            </div>
+			<div class="menu-container">
+				<div class="filter-bar">
+					<ul class="content-type">
+						<li><a class="new" href="@{Application.index()}">New</a></li>
+						#{if category}
+							<li><a class="top" href="@{Application.top(category.slugify())}">Top ${category}</a></li>
+						#{/if}
+						#{else}
+							<li><a class="top" href="@{Application.top('all-time')}">Top</a></li>
+						#{/else}
+						<li><a class="hot" href="@{Application.hot()}">Hot</a></li>
+						<li><a class="tags" href="@{Application.getPopularTags()}">Popular Tags</a></li>
+					</ul>
+					<a class="random" href="@{Application.random()}">Random</a>
+				</div>
+				<div id="top-nav" class="top">
+					<a href="@{Application.top('all-time')}">All Time</a>
+					<a href="@{Application.top('this-month')}">This Month</a>
+					<a href="@{Application.top('this-week')}">This Week</a>
+					<a href="@{Application.top('today')}">Today</a>
+				</div>
+			</div>
+        </div>
+
+        <div id="main">
+		
+            #{doLayout /} 
+        </div>
+        
+        <p id="footer">
+            made by <b>shkomyVSjanke100</b>
+        </p>
+    
+	    <script type="text/javascript">
+			$(document).ready(function(){
+				
+				// Top submenu show on hover
+				$('.top').hover(function(){
+					$('#top-nav').toggle();
+				});
+				
+				// Close flash success messages
+				$('.success .close').click(function(){
+					$('.success').slideUp("slow");
+				});
+			});
+		</script>
+        
+    </body>
+</html>

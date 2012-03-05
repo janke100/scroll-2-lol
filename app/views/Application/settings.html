@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol: Settings' /}
+
+#{form @Application.saveUser(), class:'settings'}
+    
+    <fieldset>
+		<legend>Change your information</legend>
+*{		
+		#{ifErrors}
+	        <p class="error">
+	            ${errors[0]}
+	        </p>
+    	#{/ifErrors}
+}*		
+		<p>
+	        <label for="password">Current password: <span class="asterisk-required">*</span></label>
+	        <input type="password" size="30" name="password" id="password" autofocus="autofocus" />
+	        <span class="${errors.forKey('password') ? 'error' : ''}">#{error 'password' /}</span>
+	    </p>
+	    <br />
+	    <p>
+	        <label for="newpass">New password:</label>
+	        <input type="password" size="30" name="newpass" id="newpass" />
+	    </p>
+	    <p>
+	        <label for="retypenew">Confirm new password:</label>
+	        <input type="password" size="30" name="retypenew" id="retypenew" />
+	        <span class="${errors.forKey('mismatch') ? 'error' : ''}">#{error 'mismatch' /}</span>
+	    </p>
+	    <br />
+	    <p>
+	        <label for="username">New username:</label>
+	        <input type="text" size="30" name="username" id="username" value="${username}" />
+	        <span class="${errors.forKey('profile.username') ? 'error' : ''}">#{error 'profile.username' /}</span>
+	    </p>
+		<br />
+		<p class="asterisk-required">* = Required</p>
+		<br />
+	    <p>
+	        <input type="submit" value="Save" />
+	    </p>
+	</fieldset>
+#{/form}

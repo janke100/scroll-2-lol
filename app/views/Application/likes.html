@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set title: 'scroll2lol: ' + profile.username + '\'s profile' /}
+
+<h2 class="profile-header">${profile.username}'s profile</h2>
+
+<div class="profile-bar filter-bar">
+	<ul class="content-type">
+		<li><a href="@{Application.profile(profile.username)}">Uploads</a></li>
+		<li><a class="current" href="@{Application.likes(profile.username)}">Likes</a></li>
+	</ul>
+</div>
+
+#{if posts.size()}
+	#{list items:posts, as:'post'}
+		#{display post:post, as:'compact', user:user /}
+	#{/list}
+#{/if}
+
+#{else}
+    <div class="empty">
+        No likes by ${profile.username}.
+    </div>
+#{/else}
+
+<ul id="pagination">
+#{if nextPage!=1}
+	#{if previousPage == 0}
+		<li id="previous">
+			<a href="@{Application.likes(profile.username)}">previous</a>
+		</li>
+	#{/if}
+	#{else}
+		<li id="previous">
+			<a href="@{Application.likes(profile.username, previousPage)}">previous</a>
+		</li>
+	#{/else}
+#{/if}
+#{if nextButton}
+	<li id="next">
+		<a href="@{Application.likes(profile.username, nextPage)}">next</a>
+	</li>
+#{/if}
+</ul>

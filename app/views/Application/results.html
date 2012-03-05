@@ -1,0 +1,38 @@
+#{extends 'main.html' /}
+#{set title:'scroll2lol: Search results for: '+ query /}
+
+#{if allPostsSize > 1}
+   <h3>There are ${allPostsSize} results for '${query}'</h3>
+#{/if}
+#{elseif allPostsSize == 1}
+    <h3>There is 1 result for '${query}'</h3>
+#{/elseif}
+#{else}
+    <h3>No results for '${query}'</h3>
+#{/else}
+
+<div>
+    #{list items:posts, as:'post'}
+		#{display post:post, as:'compact', user:user /}
+    #{/list}
+</div>
+
+<ul id="pagination">
+#{if nextPage!=1}
+	#{if previousPage == 0}
+		<li id="previous">
+			<a href="@{Application.results(query)}">previous</a>
+		</li>
+	#{/if}
+	#{else}
+		<li id="previous">
+			<a href="@{Application.results(query, previousPage)}">previous</a>
+		</li>
+	#{/else}
+#{/if}
+#{if nextButton}
+	<li id="next">
+		<a href="@{Application.results(query, nextPage)}">next</a>
+	</li>
+#{/if}
+</ul>
