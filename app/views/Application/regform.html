@@ -11,7 +11,12 @@
 	            ${errors[0]}
 	        </p>
     	#{/ifErrors}
-}*		
+}*
+
+		#{if flash.error}
+			<p class="error">${flash.error}</p>
+		#{/if}
+
 		<p>
 			<label>Enter your email: <span class="asterisk-required">*</span></label>
 	        <input type="text" name="email" size="30" autofocus="autofocus" />
@@ -50,4 +55,4 @@
 	        <input type="submit" value="Submit" />
 	    </p>
 	</fieldset>
-#{/form}  
+#{/form}

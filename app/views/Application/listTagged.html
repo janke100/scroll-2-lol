@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'scroll2lol: Posts tagged with ' + tag.name /}
  
-#{if posts.size()}
+#{if taggedCount > 0}
 	<h3>${taggedCount} post${taggedCount.pluralize()} tagged with '${tag.name}'</h3>
     #{list items:posts, as:'post'}
 		#{display post:post, as:'compact', user:user /}

@@ -19,7 +19,10 @@
             <div class="comment-content">
                 <div class="about">Detail: </div>
                 ${comment.content.escape().nl2br()}
-            </div>
+			</div>
+			#{secure.check "admin"}
+				<input type="submit" value="Delete comment" id="${comment.id}" class="delete-comment"/>
+			#{/secure.check}
        </div>
     #{/list}    
 </div>
@@ -52,5 +55,12 @@
 					},2000);
       		   	$('form textarea').get(0).focus();
       	}
+		
+		//Delete comment (admin)
+		$('.delete-comment').click(function(){
+			$.post('@{deleteComment}', {commentId: $(this).attr('id')});
+			$(this).parents(".comment").hide("slow");
+		});
+		
    	});
 </script>

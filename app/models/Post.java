@@ -19,7 +19,7 @@ public class Post extends Model {
 	@Required(message = "Image is required!")
     public Blob image;
     
-	@Required(message = "Author is required!")
+//	@Required(message = "Author is required!")
     @ManyToOne
     public User author;
     
@@ -33,7 +33,7 @@ public class Post extends Model {
 	
 	@URL(message = "Invalid source URL!")
 	public String source;
-    
+
     public Post(User author, String title, Blob image, String source) {
     	this.comments = new ArrayList<Comment>();
     	this.tags = new TreeSet<Tag>();
@@ -42,14 +42,19 @@ public class Post extends Model {
         this.image = image;
 		this.source = source;
         this.postedAt = new Date();
-        this.likes=0;
+        this.likes = 0;
     }
 	
-//	@Override
-//	public void _delete() {
-//		super._delete();
-//		image.getFile().delete();
-//	}
+	@Override
+	public void _delete() {
+		List<User> users= User.find("select u from User u join u.liked as l where l.id = ?", this.id ).fetch();
+		for (User user : users) {
+			user.liked.remove(this);
+			user.save();
+			}
+		this.image.getFile().delete();
+		super._delete();
+	}
     
     public Post addComment(String author, String content) {
         Comment newComment = new Comment(this, author, content).save();
@@ -58,11 +63,11 @@ public class Post extends Model {
         return this;
     }
     
-    public Post previous() {
+    public Post next() {
         return Post.find("postedAt < ? order by postedAt desc", postedAt).first();
     }
      
-    public Post next() {
+    public Post previous() {
         return Post.find("postedAt > ? order by postedAt asc", postedAt).first();
     }
     
@@ -88,8 +93,9 @@ public class Post extends Model {
     }
     
     public static List<Post> findTitleOrTag(String s) {
+    	String str = s.toLowerCase();
     	return Post.find(
-    		"select distinct p from Post p left outer join p.tags as t where p.title like ? or t.name like ?", "%"+s+"%", "%"+s+"%"
+    		"select distinct p from Post p left outer join p.tags as t where LOWER(p.title) like ? or LOWER(t.name) like ?", "%"+str+"%", "%"+str+"%"
     	).fetch();
     }
 

@@ -16,6 +16,16 @@ public class Tag extends Model implements Comparable<Tag> {
     private Tag(String name) {
         this.name = name;
     }
+	
+	@Override
+	public void _delete() {
+		List<Post> posts = Post.findTaggedWith(this.id);
+		for (Post post : posts) {
+			post.tags.remove(this);
+			post.save();
+		}
+		super._delete();
+	} 
  
     public String toString() {
         return name;

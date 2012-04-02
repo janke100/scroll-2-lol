@@ -17,11 +17,12 @@ GET		/top/{category}							Application.top
 GET		/top									Application.top
 GET		/hot/{page}								Application.hot
 GET		/hot									Application.hot
-GET		/post/{id}								Application.show
+GET		/post/{id}/{postTitleSlugified}			Application.show
 POST	/post/{postId}/comment					Application.postComment
+POST	/post/{commentId}						Application.deleteComment
 GET     /captcha                                Application.captcha
-GET     /posts/{tagId}/{tagNameSlugified}/{page}  Application.listTagged
-GET     /posts/{tagId}/{tagNameSlugified}		Application.listTagged
+GET     /tag/{tagId}/{tagNameSlugified}/{page}	Application.listTagged
+GET     /tag/{tagId}/{tagNameSlugified}			Application.listTagged
 GET     /upload			                  		Application.form
 POST    /upload                            		Application.save
 GET		/picture/{id}							Application.showPic
@@ -35,8 +36,9 @@ GET		/settings								Application.settings
 POST	/settings								Application.saveUser
 GET		/random									Application.random
 GET		/search/								Application.results
-GET 	/delete/{id}							Application.deletePost
+POST 	/delete/{id}							Application.deletePost
 GET		/populartags							Application.getPopularTags
+GET		/activate								Application.activateUser
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

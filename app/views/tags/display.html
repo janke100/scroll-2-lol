@@ -28,24 +28,36 @@
 			<div id="menu">
 				#{if _user}
 					#{if _post.author == _user}
-						<a class="buttons deletepost" href="@{Application.deletePost(_post.id)}">Delete</a>
+						<a class="buttons deletepost" href="javascript:void(0)">Delete</a>
 					#{/if}
-					<a class="${_post.id} buttons like ${!_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Like</a>
-					<a class="${_post.id} buttons unlike ${_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Unlike</a>
+					#{if !_user.liked.contains(_post)}
+						<a class="${_post.id} buttons like" href="javascript:void(0)">Like</a>
+					#{/if}
+					#{else}
+						<a class="${_post.id} buttons unlike" href="javascript:void(0)">Unlike</a>
+					#{/else}
 				#{/if}
 				&nbsp;&nbsp;&nbsp;
-				#{if _post.next()}
-		  		  	<a class="nav" href="@{Application.show(_post.next().id)}">&lt;</a>
+				#{if _post.previous()}
+		  		  	<a class="nav" href="@{Application.show(_post.previous().id, _post.previous().title.slugify())}">&lt;</a>
 		   		 #{/if}
-		   		 #{if _post.previous()}
-		   		 	<a class="nav" href="@{Application.show(_post.previous().id)}">&gt;</a>
+		   		 #{if _post.next()}
+		   		 	<a class="nav" href="@{Application.show(_post.next().id, _post.next().title.slugify())}">&gt;</a>
 		  	 	 #{/if}
 			</div>
 		    <h2 class="post-title">
-		        <a href="@{Application.show(_post.id)}">${_post.title}</a>
+		        <a href="@{Application.show(_post.id, _post.title.slugify())}">${_post.title}</a>
 		    </h2>
 		    <div class="post-metadata">
-		        <span class="post-author">by <a href="@{Application.profile(_post.author.username)}">${_post.author.username}</a></span>
+		        <span class="post-author">
+					by
+					#{if _post.author}
+						<a href="@{Application.profile(_post.author.username)}">${_post.author.username}</a>
+					#{/if}
+					#{else}
+						<span>deleted user</span>
+					#{/else}
+				</span>
 		        &nbsp;|&nbsp;
 		        <span class="post-date">${_post.postedAt.since()}</span>
 		        &nbsp;|&nbsp;
@@ -91,18 +103,27 @@
 		#{/if}
 		<a href="@{Application.showPic(_post.id)}"><img class="post-content" src="@{Application.showPic(_post.id)}" alt="${_post.id}" /></a>
 	</div>
+	#{form @deletePost(_post.id), method:"POST", id:"delete-form", class:"invisible"}#{/form}
 #{/if}
 #{elseif _as == 'compact'}
 	<div class="post">
 		<div class="front">	
-			<a href="@{Application.show(_post.id)}"><img class="post-content" src="@{Application.showPic(_post.id)}" alt="${_post.id}" /></a>
+			<a href="@{Application.show(_post.id, _post.title.slugify())}"><img class="post-content" src="@{Application.showPic(_post.id)}" alt="${_post.id}" /></a>
 		</div>
 		<div class="post-data">
 	    	<h2 class="post-title">
-	        	<a href="@{Application.show(_post.id)}">${_post.title}</a>
+	        	<a href="@{Application.show(_post.id, _post.title.slugify())}">${_post.title}</a>
 	        </h2>
 	    	<div class="post-metadata">
-	        	<span class="post-author">by <a href="@{Application.profile(_post.author.username)}">${_post.author.username}</a></span>
+	        	<span class="post-author">
+						by
+						#{if _post.author}
+							<a href="@{Application.profile(_post.author.username)}">${_post.author.username}</a>
+						#{/if}
+						#{else}
+							<span>deleted user</span>
+						#{/else}
+				</span>
 	        	<br />
 	        	<span class="post-date">${_post.postedAt.since()}</span>
 	        	<br />
@@ -124,10 +145,14 @@
 	            <br /><br /><br />
 				#{if _user}
 					<span class="actions">
-						<a class="buttons comment" href="@{Application.show(_post.id)}#comments">Comment</a>
+						<a class="buttons comment" href="@{Application.show(_post.id, _post.title.slugify())}#comments">Comment</a>
 						
-						<a class="${_post.id} buttons like ${!_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Like</a>
-						<a class="${_post.id} buttons unlike ${_user.liked.contains(_post) ? '' : 'hidden'}" href="javascript:void(0)">Unlike</a>
+						#{if !_user.liked.contains(_post)}
+							<a class="${_post.id} buttons like" href="javascript:void(0)">Like</a>
+						#{/if}
+						#{else}
+							<a class="${_post.id} buttons unlike" href="javascript:void(0)">Unlike</a>
+						#{/else}
 					</span>
 					<br /><br />
 				#{/if}
@@ -162,21 +187,25 @@
 $(document).ready(function(){
 
 	//Like
-	$('.${_post.id}.buttons.like').click(function(){
+	$('.${_post.id}.buttons.like').live("click", function(){
 		$.post('@{like}', {id: ${_post.id}}, function(postLikes){
 			$('#${_post.id}').html('Likes: ' + postLikes)
-			$('.${_post.id}.buttons.like').hide();
-			$('.${_post.id}.buttons.unlike').show();
+			$('.${_post.id}.buttons.like').removeClass("like").addClass("unlike").html("Unlike");
 		}, 'json');
 	});
 
 	//Unlike
-	$('.${_post.id}.buttons.unlike').click(function(){
+	$('.${_post.id}.buttons.unlike').live("click", function(){
 		$.post('@{unlike}', {id: ${_post.id}}, function(postLikes){
 			$('#${_post.id}').html('Likes: ' + postLikes)
-			$('.${_post.id}.buttons.unlike').hide();
-			$('.${_post.id}.buttons.like').show();
+			$('.${_post.id}.buttons.unlike').removeClass("unlike").addClass("like").html("Like");
 		}, 'json');
 	});
+	
+	//Delete post
+	$('.buttons.deletepost').click(function(){
+		$('#delete-form').submit();
+	});
+	
 });
 </script>

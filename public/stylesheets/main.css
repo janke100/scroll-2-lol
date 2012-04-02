@@ -384,6 +384,7 @@ h3 span {
 .comment {
     width: 70%;
     clear: both;
+	position: relative;
 }
 
 .comment .comment-metadata {
@@ -1037,10 +1038,21 @@ h2.profile-header {
 #search {
 	float: right;
 	text-align: center;
-	margin: -30px -20px 0 0;
+	margin: -25px -20px 0 0;
 	width: 45%;
 }
 
 #search p {
 	margin: 0px;
+}
+
+.delete-comment {
+	position: absolute;
+	top: 5px;
+	right: -150px;
+	padding: 0;
+}
+
+.invisible {
+	display: none;
 }

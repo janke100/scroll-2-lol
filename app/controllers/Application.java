@@ -8,7 +8,9 @@ import play.data.validation.*;
 import play.db.jpa.Blob;
 import play.libs.*;
 import play.cache.*;
- 
+import play.templates.JavaExtensions;
+import notifiers.Mails;
+
 import models.*;
 
 import java.awt.image.BufferedImage;
@@ -78,7 +80,7 @@ public class Application extends Controller {
 			category = "all-time";
 		
 		if(category.equals("all-time")) {
-			posts = Post.find("order by likes desc").from(page*5).fetch(5);
+			posts = Post.find("order by likes desc, postedAt desc").from(page*5).fetch(5);
 			category = "All Time";
 			if(Post.count() > page*5 + 5)
 				nextButton = true;
@@ -99,7 +101,7 @@ public class Application extends Controller {
 			Calendar calendar = Calendar.getInstance();
 			calendar.add(Calendar.HOUR, timeOffset);
 			Date startingDate = calendar.getTime();
-			posts = Post.find("postedAt > ? order by likes desc", startingDate).from(page*5).fetch(5);
+			posts = Post.find("postedAt > ? order by likes desc, postedAt desc", startingDate).from(page*5).fetch(5);
 			if(Post.count("postedAt > ?", startingDate) > page*5 + 5)
 				nextButton = true;
 		}
@@ -119,7 +121,7 @@ public class Application extends Controller {
     	render("@show", post);
 	}
     
-    public static void show(long id) {
+    public static void show(long id, String postTitleSlugified) {
     	Post post = Post.findById(id);
     	notFoundIfNull(post);
     	render(post);
@@ -129,7 +131,6 @@ public class Application extends Controller {
     	Post post = Post.findById(id);
     	notFoundIfNull(post);
     	if(post.author.email.equals(Security.connected())) {
-    		post.image.getFile().delete();
         	post.delete();
         	flash.success("Post deleted!");
         	index();
@@ -139,21 +140,27 @@ public class Application extends Controller {
     
     public static void like(long id){
     	Post post = Post.findById(id);
+		notFoundIfNull(post);
 		User user = User.find("byEmail", Security.connected()).first();
-    	post.likes++;
-		post.save();
-		user.liked.add(post);
-		user.save();
+		if(!containsPost(user.liked, post)) {
+			post.likes++;
+			post.save();
+			user.liked.add(post);
+			user.save();
+		}
 		renderJSON(post.likes);
     }
     
 	public static void unlike(long id){
     	Post post = Post.findById(id);
+		notFoundIfNull(post);
 		User user = User.find("byEmail", Security.connected()).first();
-    	post.likes--;
-		post.save();
-		user.liked.remove(post);
-		user.save();
+		if(containsPost(user.liked, post)) {
+			post.likes--;
+			post.save();
+			user.liked.remove(post);
+			user.save();
+		}
 		renderJSON(post.likes);
     }
 	
@@ -229,10 +236,10 @@ public class Application extends Controller {
 		
 		post.save();
 		flash.success("Thanks for posting %s!", author.username);
-		show(post.id);
+		show(post.id, JavaExtensions.slugify(post.title));
 	}
 
-    public static void postComment(long postId,  
+    public static void postComment(long postId,
             @Required(message="A message is required!") @MaxSize(value=10000, message="Message is too long!") String content)
     {
         Post post = Post.findById(postId);
@@ -242,8 +249,14 @@ public class Application extends Controller {
         User author = User.find("byEmail", Security.connected()).first();
         post.addComment(author.username, content);
         flash.success("Thanks for commenting %s!", author.username);
-        show(post.id);
+        show(post.id, JavaExtensions.slugify(post.title));
     }
+	
+	public static void deleteComment(long commentId) {
+		Comment comment = Comment.findById(commentId);
+		notFoundIfNull(comment);
+		comment.delete();
+	}
     
     public static void captcha(String randomID) {
         Images.Captcha captcha = Images.captcha();
@@ -279,17 +292,40 @@ public class Application extends Controller {
             render("@regform", newUser, randomID);
         }
     	Cache.delete(randomID);
-    	newUser.save();
-    	flash.success("Oh yeah! You're signed up now, %s! Post something funny!", newUser.username);
-		session.put("username", email);
-		//response.setCookie("rememberme", Crypto.sign(email) + "-" + email, "30d");	//to set rememberme cookie
-    	index();
+		String token = Codec.UUID();
+		Cache.set(token + "email", newUser.email, "24h");
+		Cache.set(token + "password", newUser.password, "24h");
+		Cache.set(token + "username", newUser.username, "24h");
+		Mails.registration(newUser.email, token);
+    	render();
     }
+	
+	public static void activateUser(String token) {
+		if (Security.isConnected())
+    		index();
+		if(Cache.get(token + "email") != null) {
+			User user = new User(Cache.get(token + "email").toString(), Cache.get(token + "password").toString(), Cache.get(token + "username").toString());	
+			Cache.delete(token + "email");
+			Cache.delete(token + "password");
+			Cache.delete(token + "username");
+			validation.valid(user);
+			if(validation.hasErrors()) {
+				flash.error("Username and/or email are already in use.");
+				regform();
+			}
+			user.save();
+			flash.success("Oh yeah! You're signed up now, %s! Post something funny!", user.username);
+			session.put("username", user.email);
+			index();			
+		}
+		flash.error("Sorry, but your activation link has expired. You need to repeat the registration process.");
+		regform();
+	}
     
     public static void listTagged(long tagId, String tagNameSlugified, int page) {
         boolean nextButton = false;
 		List<Post> posts = Post.find(
-			"select distinct p from Post p join p.tags as t where t.id = ? order by p.likes desc", tagId
+			"select p from Post p join p.tags as t where t.id = ? order by p.likes desc, p.postedAt desc", tagId
 		).from(page*5).fetch(5);
 		long taggedCount = Post.count("select count(p.id) from Post p join p.tags as t where t.id = ?", tagId);
 		if(taggedCount > page*5 + 5)
@@ -317,7 +353,7 @@ public class Application extends Controller {
     	notFoundIfNull(profile);
 		boolean nextButton = false;
 		List<Post> posts = Post.find(
-			"select distinct p from User u join u.liked as p where u.username = ? order by p.postedAt desc", username
+			"select p from User u join u.liked as p where u.username = ? order by p.postedAt desc", username
 		).from(page*5).fetch(5);
 		if(profile.liked.size() > page*5 + 5)
 			nextButton = true;
@@ -362,7 +398,7 @@ public class Application extends Controller {
 			subPosts = Post.findTitleOrTag(queryarray[i]);
 			int size = subPosts.size();
 			for(int j=0; j<size; j++) {
-				if(!allPosts.contains(subPosts.get(j)))
+				if(!containsPost(allPosts, subPosts.get(j)))
 					allPosts.add(subPosts.get(j));
 			}
 		}
@@ -378,6 +414,15 @@ public class Application extends Controller {
 		int nextPage = page + 1;
 		int previousPage = page - 1;
 		render(query, allPostsSize, posts, previousPage, nextPage, nextButton);
+	}
+	
+	private static boolean containsPost(List<Post> posts, Post post) {
+		boolean result = false;
+		for(Post postFromList : posts) {
+			if (postFromList.id == post.id)
+				result = true;
+		}
+		return result;
 	}
 	
 	public static void getPopularTags() {
